@@ -40,7 +40,7 @@ zabbix_export:
               trigger_prototypes:
                 -
                   uuid: 9795dbeccb5543abaed900d3d0db7d24
-                  expression: 'last(/RouterOS BGP/bgp_peer.sh["state", "{HOST.CONN}", "{$ROUTEROS_USERNAME}", "{$ROUTEROS_PASSWORD}", {#BGP_PEER_NAME}])=0'
+                  expression: 'last(/RouterOS BGP/bgp_peer.sh["state", "{HOST.CONN}", "{$ROUTEROS_USERNAME}", "{$ROUTEROS_PASSWORD}", {#BGP_PEER_NAME}],#5)=0'
                   name: 'BGP peer {#BGP_PEER_NAME} state is not established'
                   priority: WARNING
             -
