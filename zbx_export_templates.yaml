@@ -1,0 +1,70 @@
+zabbix_export:
+  version: '6.0'
+  date: '2022-11-16T09:37:31Z'
+  groups:
+    -
+      uuid: dd9946fc598f4b048e15382ea0095021
+      name: 'Router Mikrotik'
+  templates:
+    -
+      uuid: 25863ed1dc6d48b69511d4feb8a0e20f
+      template: 'RouterOS BGP'
+      name: 'RouterOS BGP'
+      description: |
+        An updated verion of MrCirca's [repository](https://github.com/MrCirca/zabbix-routeros-bgp)
+        Tested on RouterOS 7.3.1
+
+
+        ## Author
+
+        buduboti
+
+      groups:
+        -
+          name: Templates
+      discovery_rules:
+        -
+          uuid: 868c51117d4741dabd2b60e31b93df82
+          name: 'BGP peer names'
+          type: EXTERNAL
+          key: 'bgp_peer.sh["names", "{HOST.CONN}","{$ROUTEROS_USERNAME}","{$ROUTEROS_PASSWORD}"]'
+          item_prototypes:
+            -
+              uuid: 35b4d95eb0bb47809bd4bfcded070bdb
+              name: 'BGP peer {#BGP_PEER_NAME} state'
+              type: EXTERNAL
+              key: 'bgp_peer.sh["state", "{HOST.CONN}", "{$ROUTEROS_USERNAME}", "{$ROUTEROS_PASSWORD}", {#BGP_PEER_NAME}]'
+              delay: '5'
+              valuemap:
+                name: 'RouterOS BGP value mapping'
+              trigger_prototypes:
+                -
+                  uuid: 9795dbeccb5543abaed900d3d0db7d24
+                  expression: 'last(/RouterOS BGP/bgp_peer.sh["state", "{HOST.CONN}", "{$ROUTEROS_USERNAME}", "{$ROUTEROS_PASSWORD}", {#BGP_PEER_NAME}])=0'
+                  name: 'BGP peer {#BGP_PEER_NAME} state is not established'
+                  priority: WARNING
+            -
+              uuid: 1d58b71fe5ab40e1ab30f8ee5a4ea2ab
+              name: 'BGP peer {#BGP_PEER_NAME} uptime'
+              type: EXTERNAL
+              key: 'bgp_peer.sh["uptime", "{HOST.CONN}", "{$ROUTEROS_USERNAME}", "{$ROUTEROS_PASSWORD}", {#BGP_PEER_NAME}]'
+              delay: '5'
+      macros:
+        -
+          macro: '{$ROUTEROS_PASSWORD}'
+          value: zabbix_password
+        -
+          macro: '{$ROUTEROS_USERNAME}'
+          value: zabbix_username
+      valuemaps:
+        -
+          uuid: 0f81ba7af1594b54a006b707b228480f
+          name: 'RouterOS BGP value mapping'
+          mappings:
+            -
+              value: '0'
+              newvalue: error
+            -
+              type: GREATER_OR_EQUAL
+              value: '1'
+              newvalue: established
