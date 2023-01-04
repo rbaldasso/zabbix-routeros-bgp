@@ -8,3 +8,11 @@ Create the files below and make sure that they are owned by the Zabbix user:
 
  * /usr/share/zabbix/bgp-peer-all-status
  * /usr/share/zabbix/bgp-peer-statuses
+ * Make sure that the Zabbix folder is owned by the Zabbix user for the SSH to work properly
+ * Install sshpass (apt install sshpass or yum install sshpass)
+ 
+### Requirements
+
+ * sshpass
+ * RouterOS >=7.6
+ * Zabbix >=6
