@@ -2,7 +2,7 @@ This is a fork of MrCirca's [repository](https://github.com/MrCirca/zabbix-route
 
 ### Installation
 
-Import the template, set the macros (user credentials and SSH portfor zabbix) and copy the [bgp_peer.sh](/bgp_peer.sh) script to the externalscripts directory ([link](https://www.zabbix.com/documentation/current/en/manual/config/items/itemtypes/external#external-check-result)).
+Import the template, set the macros (user credentials that and SSH port of your Mikrotik router) and copy the [bgp_peer.sh](/bgp_peer.sh) script to the externalscripts directory ([link](https://www.zabbix.com/documentation/current/en/manual/config/items/itemtypes/external#external-check-result)).
 
 Create the files below and make sure that they are owned by the Zabbix user:
 
@@ -10,6 +10,7 @@ Create the files below and make sure that they are owned by the Zabbix user:
  * /usr/share/zabbix/bgp-peer-statuses
  * Make sure that the Zabbix folder is owned by the Zabbix user for the SSH to work properly
  * Install sshpass (apt install sshpass or yum install sshpass)
+ * We recommend creating a new username and password especially for Zabbix on your Mikrotik router
  
 ### Requirements
 
