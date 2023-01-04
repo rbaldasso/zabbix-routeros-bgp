@@ -100,7 +100,7 @@ elif [ $querytype = "names" ]; then
 			-o ConnectTimeout=5 \
 			-o ConnectionAttempts=3 \
 			-o StrictHostKeyChecking=no \
-			$username@$hostname -p $sshport "/routing/bgp/export" | sed -z 's/\r//g;s/\\\n    //g' | grep -v " disabled=yes " | grep --color=never -Po "name=\K[0-9a-z-]*" > /tmp/bgp-peer-statuses
+			$username@$hostname -p $sshport "/routing/bgp/export" | sed -z 's/\r//g;s/\\\n    //g' | grep -v " disabled=yes " | grep -E -o "name=[^ ]+" | cut -d "=" -f 2  > /tmp/bgp-peer-statuses
 
 	out="{\"data\": ["
 	while read name;
