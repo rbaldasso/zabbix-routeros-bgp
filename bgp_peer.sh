@@ -19,9 +19,10 @@ function valid_ip()
 
 declare -a dependencies=(/usr/bin/timeout /usr/bin/sshpass /usr/bin/ssh)
 for dependency in ${dependencies[@]}; do
-	[ ! -x $dependency ] \
-		&& ERROR_MESSAGE="ERROR: Missing $dependency" \
-		&& exit 100
+	if [ ! -x "$dependency" ]; then 
+			echo "Please install: $dependency which is required for this script to work!" 
+	    exit 1
+	  fi
 done
 
 if [ $# -lt 4 ];
@@ -52,12 +53,13 @@ if [ $querytype = "state" -o $querytype = "uptime" ]; then
 		raw_time=$( grep "name=\"$peername" --color=never /tmp/bgp-peer-all-status | grep -Po " uptime=\K[^ ]+" )
 		finalTime=0
 
-		for time in `echo $raw_time | grep -Po --color=never '[0-9]{1,2}[a-z]{1,2}'`
+		for time in `echo $raw_time | grep -Po --color=never '[0-9]{1,3}[a-z]{1,2}'`
 		do
-			timeUnit=$( echo $time | grep -Eo --color=never "[a-z]" )
+			timeUnit=$( echo $time | grep -Eo --color=never "[a-z]{1,2}" )
 			timeCounter=$( echo $time | grep -Eo --color=never "[0-9]+" )
 
 			case $timeUnit in
+				## Intentionally not calculating ms
 				s)
 					(( finalTime += timeCounter ))
 					;;
