@@ -50,35 +50,40 @@ if [ $querytype = "state" -o $querytype = "uptime" ]; then
 			-o ConnectTimeout=5 \
 			-o ConnectionAttempts=3 \
 			-o StrictHostKeyChecking=no \
-			$username@$hostname -p $sshport "/routing/bgp/session print" | sed -z 's/\r//g;s/\n\n/\n;/g;s/\n//g;s/;/\n/g' > /tmp/bgp-peer-all-status
+			$username@$hostname -p $sshport "/routing/bgp/session print" | sed -z 's/\r//g;s/\n\n/\n;/g;s/\n//g;s/;/\n/g' > /usr/share/zabbix/bgp-peer-all-status
 
 	if [ $querytype = "state" ]; then
-		grep -c " E name=\"$peername" /tmp/bgp-peer-all-status 
+		grep -c " E name=\"$peername" /usr/share/zabbix/bgp-peer-all-status 
 	elif [ $querytype = "uptime" ]; then
-		raw_time=$( grep "name=\"$peername" --color=never /tmp/bgp-peer-all-status | grep -Po " uptime=\K[^ ]+" )
+		raw_time=$( grep "name=\"$peername" --color=never /usr/share/zabbix/bgp-peer-all-status | grep -Po " uptime=\K[^ ]+" )
 		finalTime=0
 
 		for time in `echo $raw_time | grep -Po --color=never '[0-9]{1,3}[a-z]{1,2}'`
 		do
+			weeks=${weeks:-0}
+			days=${days:-0}
+			hours=${hours:-0}
+			minutes=${minutes:-0}
+			seconds=${seconds:-0}
+
 			timeUnit=$( echo $time | grep -Eo --color=never "[a-z]{1,2}" )
 			timeCounter=$( echo $time | grep -Eo --color=never "[0-9]+" )
 
 			case $timeUnit in
-				## Intentionally not calculating ms
-				s)
-					(( finalTime += timeCounter ))
-					;;
-				m)
-					(( finalTime += timeCounter*60 ))
-					;;
-				h)
-					(( finalTime += timeCounter*3600 ))
+				w)
+					(( weeks += timeCounter*604800 ))
 					;;
 				d)
-					(( finalTime += timeCounter*86400 ))
+					(( days += timeCounter*86400 ))
 					;;
-				w)
-					(( finalTime += timeCounter*604800 ))
+				h)
+					(( hours += timeCounter*3600 ))
+					;;
+				m)
+					(( minutes = timeCounter*60 ))
+					;;			
+				s)
+					(( seconds= timeCounter ))
 					;;
 				*)
 					;;
@@ -86,8 +91,8 @@ if [ $querytype = "state" -o $querytype = "uptime" ]; then
 			
 		done
 
-    ### add it to convert finaltime to number
-    finalTime+=0
+    ### Calculate uptime
+    finalTime=$(echo $weeks + $days + $hours + $minutes + $seconds|bc)
   
     ### OUTPUT - write out the uptime
     echo $finalTime
@@ -100,16 +105,16 @@ elif [ $querytype = "names" ]; then
 			-o ConnectTimeout=5 \
 			-o ConnectionAttempts=3 \
 			-o StrictHostKeyChecking=no \
-			$username@$hostname -p $sshport "/routing/bgp/export" | sed -z 's/\r//g;s/\\\n    //g' | grep -v " disabled=yes " | grep -E -o "name=[^ ]+" | cut -d "=" -f 2  > /tmp/bgp-peer-statuses
+			$username@$hostname -p $sshport "/routing/bgp/export" | sed -z 's/\r//g;s/\\\n    //g' | grep -v " disabled=yes " | grep -E -o "name=[^ ]+" | cut -d "=" -f 2  > /usr/share/zabbix/bgp-peer-statuses
 
 	out="{\"data\": ["
 	while read name;
 	do
 		out="$out{\"{#BGP_PEER_NAME}\": \"$name\"}, "
 
-	done < /tmp/bgp-peer-statuses
+	done < /usr/share/zabbix/bgp-peer-statuses
 
-  if [ $(wc -l /tmp/bgp-peer-statuses | cut -f1 -d' ')  -gt 0 ]; then
+  if [ $(wc -l /usr/share/zabbix/bgp-peer-statuses | cut -f1 -d' ')  -gt 0 ]; then
     echo "${out::-2}]}"
   else
     echo "${out}]}"
