@@ -52,7 +52,7 @@ if [ $querytype = "state" -o $querytype = "uptime" ]; then
 		raw_time=$( grep "name=\"$peername" --color=never /tmp/bgp-peer-all-status | grep -Po " uptime=\K[^ ]+" )
 		finalTime=0
 
-		for time in `echo $raw_time | grep -Po --color=never '[0-9]{1,2}[a-z]{1}'`
+		for time in `echo $raw_time | grep -Po --color=never '[0-9]{1,2}[a-z]{1,2}'`
 		do
 			timeUnit=$( echo $time | grep -Eo --color=never "[a-z]" )
 			timeCounter=$( echo $time | grep -Eo --color=never "[0-9]+" )
