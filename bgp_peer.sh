@@ -27,15 +27,20 @@ done
 
 if [ $# -lt 4 ];
 then
-	echo -e "Wrong usage!\n\nUse:\n\t$0 state <hostname|ip> <username> <password> <name>\nor\n\t$0 names <hostname|ip> <username> <password>"
+	echo -e "Wrong usage!\n\nUse:\n\t$0 state <hostname|ip> <ssh-port> <username> <password> <name>\nor\n\t$0 names <hostname|ip> <ssh-port> <username> <password>"
 	exit 1
 fi
 
 querytype=$1
 hostname=$2
-username=$3
-password=$4
-peername=$5
+if [ ! -z "$sshport" ]
+then
+      sshport=22
+else sshport=$3
+fi
+username=$4
+password=$5
+peername=$6
 
 if [ $querytype = "state" -o $querytype = "uptime" ]; then
 	/usr/bin/timeout --kill-after 25.0s 20.0s \
@@ -45,7 +50,7 @@ if [ $querytype = "state" -o $querytype = "uptime" ]; then
 			-o ConnectTimeout=5 \
 			-o ConnectionAttempts=3 \
 			-o StrictHostKeyChecking=no \
-			$username@$hostname "/routing/bgp/session print" | sed -z 's/\r//g;s/\n\n/\n;/g;s/\n//g;s/;/\n/g' > /tmp/bgp-peer-all-status
+			$username@$hostname -p $sshport "/routing/bgp/session print" | sed -z 's/\r//g;s/\n\n/\n;/g;s/\n//g;s/;/\n/g' > /tmp/bgp-peer-all-status
 
 	if [ $querytype = "state" ]; then
 		grep -c " E name=\"$peername" /tmp/bgp-peer-all-status 
@@ -95,7 +100,7 @@ elif [ $querytype = "names" ]; then
 			-o ConnectTimeout=5 \
 			-o ConnectionAttempts=3 \
 			-o StrictHostKeyChecking=no \
-			$username@$hostname "/routing/bgp/export" | sed -z 's/\r//g;s/\\\n    //g' | grep -v " disabled=yes " | grep --color=never -Po "name=\K[0-9a-z-]*" > /tmp/bgp-peer-statuses
+			$username@$hostname -p $sshport "/routing/bgp/export" | sed -z 's/\r//g;s/\\\n    //g' | grep -v " disabled=yes " | grep --color=never -Po "name=\K[0-9a-z-]*" > /tmp/bgp-peer-statuses
 
 	out="{\"data\": ["
 	while read name;
