@@ -1,7 +1,10 @@
-This is a fork of MrCirca's [repository](https://github.com/MrCirca/zabbix-routeros-bgp), updated to be compatible with RouterOS 7.
-
-Tested on RouterOS 7.3.1
+This is a fork of MrCirca's [repository](https://github.com/MrCirca/zabbix-routeros-bgp), updated to be compatible with RouterOS 7. Originally created by @buduboti and updated by @rbaldasso with graphs for uptime, support for custom SSH ports, fixes to the peer state being incorrectly retrieved, fixes for the uptime calculation and more.
 
 ### Installation
 
-Import the template, set the macros (user credentials for zabbix) and copy the [bgp_peer.sh](/bgp_peer.sh) script to the externalscripts directory ([link](https://www.zabbix.com/documentation/current/en/manual/config/items/itemtypes/external#external-check-result)).
+Import the template, set the macros (user credentials and SSH portfor zabbix) and copy the [bgp_peer.sh](/bgp_peer.sh) script to the externalscripts directory ([link](https://www.zabbix.com/documentation/current/en/manual/config/items/itemtypes/external#external-check-result)).
+
+Create the files below and make sure that they are owned by the Zabbix user:
+
+ * /usr/share/zabbix/bgp-peer-all-status
+ * /usr/share/zabbix/bgp-peer-statuses
