@@ -1,24 +1,23 @@
 zabbix_export:
   version: '6.0'
-  date: '2022-11-16T09:37:31Z'
+  date: '2023-01-05T15:38:59Z'
   groups:
     -
-      uuid: dd9946fc598f4b048e15382ea0095021
-      name: 'Router Mikrotik'
+      uuid: 7df96b18c230490a9a0a9e2307226338
+      name: Templates
   templates:
     -
       uuid: 25863ed1dc6d48b69511d4feb8a0e20f
-      template: 'RouterOS BGP'
-      name: 'RouterOS BGP'
+      template: 'RouterOS 7 BGP Monitoring'
+      name: 'RouterOS 7 BGP Monitoring'
       description: |
-        An updated verion of MrCirca's [repository](https://github.com/MrCirca/zabbix-routeros-bgp)
-        Tested on RouterOS 7.3.1
-
-
+        An updated verion of MrCirca's [repository](https://github.com/rbaldasso/zabbix-routeros-bgp/)
+        Tested on RouterOS 7.6
+        
+        
         ## Author
-
-        buduboti
-
+        
+        buduboti / rbaldasso
       groups:
         -
           name: Templates
@@ -27,32 +26,48 @@ zabbix_export:
           uuid: 868c51117d4741dabd2b60e31b93df82
           name: 'BGP peer names'
           type: EXTERNAL
-          key: 'bgp_peer.sh["names", "{HOST.CONN}","{$ROUTEROS_USERNAME}","{$ROUTEROS_PASSWORD}"]'
+          key: 'bgp_peer.sh["names", "{HOST.CONN}","{$ROUTEROS_SSHPORT}","{$ROUTEROS_USERNAME}","{$ROUTEROS_PASSWORD}"]'
           item_prototypes:
             -
               uuid: 35b4d95eb0bb47809bd4bfcded070bdb
               name: 'BGP peer {#BGP_PEER_NAME} state'
               type: EXTERNAL
-              key: 'bgp_peer.sh["state", "{HOST.CONN}", "{$ROUTEROS_USERNAME}", "{$ROUTEROS_PASSWORD}", {#BGP_PEER_NAME}]'
-              delay: '5'
+              key: 'bgp_peer.sh["state", "{HOST.CONN}", "{$ROUTEROS_SSHPORT}", "{$ROUTEROS_USERNAME}", "{$ROUTEROS_PASSWORD}", {#BGP_PEER_NAME}]'
+              delay: '60'
               valuemap:
                 name: 'RouterOS BGP value mapping'
               trigger_prototypes:
                 -
                   uuid: 9795dbeccb5543abaed900d3d0db7d24
-                  expression: 'last(/RouterOS BGP/bgp_peer.sh["state", "{HOST.CONN}", "{$ROUTEROS_USERNAME}", "{$ROUTEROS_PASSWORD}", {#BGP_PEER_NAME}],#5)=0'
+                  expression: 'last(/RouterOS 7 BGP Monitoring/bgp_peer.sh["state", "{HOST.CONN}", "{$ROUTEROS_SSHPORT}", "{$ROUTEROS_USERNAME}", "{$ROUTEROS_PASSWORD}", {#BGP_PEER_NAME}],#5)=0'
                   name: 'BGP peer {#BGP_PEER_NAME} state is not established'
                   priority: WARNING
             -
               uuid: 1d58b71fe5ab40e1ab30f8ee5a4ea2ab
               name: 'BGP peer {#BGP_PEER_NAME} uptime'
               type: EXTERNAL
-              key: 'bgp_peer.sh["uptime", "{HOST.CONN}", "{$ROUTEROS_USERNAME}", "{$ROUTEROS_PASSWORD}", {#BGP_PEER_NAME}]'
-              delay: '5'
+              key: 'bgp_peer.sh["uptime", "{HOST.CONN}", "{$ROUTEROS_SSHPORT}", "{$ROUTEROS_USERNAME}", "{$ROUTEROS_PASSWORD}", {#BGP_PEER_NAME}-1]'
+              delay: '60'
+              units: uptime
+          graph_prototypes:
+            -
+              uuid: 34b8654df7d942afb38a345716dd9a8d
+              name: 'BGP peer {#BGP_PEER_NAME} uptime'
+              graph_items:
+                -
+                  drawtype: GRADIENT_LINE
+                  color: 2E7D32
+                  calc_fnc: ALL
+                  item:
+                    host: 'RouterOS 7 BGP Monitoring'
+                    key: 'bgp_peer.sh["uptime", "{HOST.CONN}", "{$ROUTEROS_SSHPORT}", "{$ROUTEROS_USERNAME}", "{$ROUTEROS_PASSWORD}", {#BGP_PEER_NAME}-1]'
       macros:
         -
           macro: '{$ROUTEROS_PASSWORD}'
           value: zabbix_password
+        -
+          macro: '{$ROUTEROS_SSHPORT}'
+          value: '22'
         -
           macro: '{$ROUTEROS_USERNAME}'
           value: zabbix_username
